@@ -1,4 +1,4 @@
-# D-dirb
+# Dynamic-dirb
 
 Dynamic-dirb written in go.
 
@@ -19,18 +19,18 @@ go build ddirb.go
 
 ## Cross compiling
 
-Raspberry: ```env GOOS=linux GOARCH=arm go build -o ddirb_linux ./ddirb.go```
+Raspberry: ```env GOOS=linux GOARCH=arm go build -o ddirb_linux ./dynamic-dirb.go```
 
-Kali: ```env GOOS=linux GOARCH=amd64 go build -o ddirb_linux ./ddirb.go```
+Kali: ```env GOOS=linux GOARCH=amd64 go build -o ddirb_linux ./dynamic-dirb.go```
 
 ## Usage
 
 ```
-Usage of ./ddirb:
+Usage of ./dynamic-dirb:
 -type:			Set -type dynamic/static/resumeDynamic
 
 dynamic Usage:
-	-url:			Target url in http/https format (http://example.com)
+	-url:		Target url in http/https format (http://example.com)
 	-output:	Output file (default /tmp/ddirb-output)
 	-threads:	Number of threads to use
 	-delay:		Delay in seconds between each thread
@@ -38,7 +38,7 @@ dynamic Usage:
 	-graph:		Flag to save the graph in .dot language
 	-headers:	Set headers (es. Header1:value1;value2,Header2:value1)
 [NOT IMPLEMENTED YET] static Usage:
-	-url:			Target url in http/https format (http://example.com)
+	-url:		Target url in http/https format (http://example.com)
 	-output:	Output file (default /tmp/ddirb-output)
 	-threads:	Number of threads to use
 	-delay:		Delay in seconds between each thread
@@ -58,7 +58,7 @@ resumeDynamic Usage:
 
 #### "dynamic" usage
 
-```./ddirb -type dynamic -url https://example.com -graph -output ~/Desktop/ddirbOut```
+```./dynamic-dirb -type dynamic -url https://example.com -graph -output ~/Desktop/ddirbOut```
 
 Generated output:
 1. If scan has finished &rarr; ```cat ~/Desktop/ddirbOut; cat ~/Desktop.dot```
@@ -68,7 +68,7 @@ Generated output:
 #### "resumeDynamic" usage
 Resume dynamic mode can be used **only** when the dynamic scan was interrupted using ```ctrl + c```. Specifically, the ```.restore``` file is generated automaticcaly if the dynamic scan was not completed
 
-```./ddirb -type resumeDynamic -restoreFile ~/Desktop/ddirbOut.restore -output ~/Desktop/ddirbOutRestored -graph```
+```./dynamic-dirb -type resumeDynamic -restoreFile ~/Desktop/ddirbOut.restore -output ~/Desktop/ddirbOutRestored -graph```
 
 Generated output:
 1. If scan has finished &rarr; ```cat ~/Desktop/ddirbOutRestored; cat ~/ddirbOutRestored.dot```
