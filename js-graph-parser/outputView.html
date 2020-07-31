@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <title>Output View</title>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.11.2/css/all.css">
+  <!-- Bootstrap core CSS -->
+  <link rel="stylesheet" href="node_modules/mdbootstrap/css/bootstrap.min.css">
+  <!-- Material Design Bootstrap -->
+  <link rel="stylesheet" href="node_modules/mdbootstrap/css/mdb.min.css">
+  <!-- Your custom styles (optional) -->
+  <link rel="stylesheet" href="node_modules/mdbootstrap/css/style.css">
+  <!-- MDBootstrap Datatables  -->
+  <link href="node_modules/mdbootstrap/css/addons/datatables.min.css" rel="stylesheet">
+</head>
+<body>
+
+  <section class="container-fluid h-100">
+      <div id="refresh-button" class="btn btn-primary">Ricarica</div>
+  </section>
+
+  <!-- Start your project here-->
+  <table id="dtBasicExample" class="table table-striped table-bordered table-sm" cellspacing="0" width="100%">
+    <thead>
+      <tr>
+        <th class="th-sm">Url
+        </th>
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+    </tbody>
+    <tfoot>
+      <tr>
+        <th>Url
+        </th>
+      </tr>
+    </tfoot>
+  </table>
+  <!-- End your project here-->
+
+  <!-- jQuery -->
+  <script type="text/javascript" src="node_modules/mdbootstrap/js/jquery.min.js"></script>
+  <!-- Bootstrap tooltips -->
+  <script type="text/javascript" src="node_modules/mdbootstrap/js/popper.min.js"></script>
+  <!-- Bootstrap core JavaScript -->
+  <script type="text/javascript" src="node_modules/mdbootstrap/js/bootstrap.min.js"></script>
+  <!-- MDB core JavaScript -->
+  <script type="text/javascript" src="node_modules/mdbootstrap/js/mdb.min.js"></script>
+  <!-- Your custom scripts (optional) -->
+  <script type="text/javascript"></script>
+  <!-- MDBootstrap Datatables  -->
+  <script type="text/javascript" src="node_modules/mdbootstrap/js/addons/datatables.min.js"></script>
+
+  <script>
+  setTimeout(refreshOutput, 2500);
+  refreshOutput()
+  $('#refresh-button').on('click', refreshOutput);
+
+  var dataTable = $('#dtBasicExample').DataTable( {
+    "pageLength": 50
+  });
+
+
+  /**
+   * Refresh the output by getting data from the API
+   */
+  function refreshOutput() {
+      $('#loading').show();
+      $.get('http://localhost:5689/getOutput').then((response) => {
+          addRow(response.output);
+
+      });
+  }
+
+  function addRow(outputArray){
+    console.log(typeof Array.from(outputArray))
+    dataTable.clear();
+    dataTable.draw();
+    //a.rows.add(Array.from(outputArray)).draw()
+    $.each(outputArray, function(index, value) {
+          value = "<a href=\"" + value + "\" target=\"_blank\">" + value + "</a>"
+         dataTable.row.add([value,'']).draw();
+    });
+  }
+
+
+
+</script>
+</body>
+</html>

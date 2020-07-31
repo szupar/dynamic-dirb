@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en" class="h-100">
+<head>
+    <meta charset="UTF-8">
+    <title>Graph view</title>
+    <script type="text/javascript" src="node_modules/vis-network/dist/vis-network.min.js"></script>
+    <script type="text/javascript" src="node_modules/jquery/dist/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="node_modules/bootstrap/dist/css/bootstrap.min.css">
+
+
+
+    <style>
+        #refresh-button {
+            position: fixed;
+            margin-top: 2rem;
+            margin-right: 2rem;
+            right: 0;
+            z-index: 999;
+        }
+        #loading {
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body class="h-100">
+<section class="container-fluid h-100">
+    <div id="refresh-button" class="btn btn-primary">Ricarica</div>
+    <p id="loading" class="position-fixed p-3 text-white">Loading</p>
+    <section class="row h-100">
+        <div id="graph" class="h-100 w-100"></div>
+    </section>
+</section>
+
+<script type="application/javascript">
+    $('#refresh-button').on('click', refreshGraph);
+    setTimeout(refreshGraph, 2500);
+
+    /**
+     * Refresh the graph by getting data from the API
+     */
+    function refreshGraph() {
+        $('#loading').show();
+        $.get('http://localhost:5689/getGraph').then((response) => {
+            createGraph(response.graph);
+        });
+    }
+
+    let network;
+    /**
+     * Create a graph and apply to the current view
+     *
+     * @param {string} DOTstring
+     */
+    function createGraph(DOTstring) {
+        if (network) {
+            network.destroy();
+        }
+
+        // Parse the string in a usable object
+        const parsedData = vis.network.dotparser.parseDOT(DOTstring);
+
+        if (!parsedData.nodes) {
+            return;
+        }
+
+        // Create labels for each node to be displaied in the view
+        parsedData.nodes.forEach(node => {
+            node.label = node.id;
+        })
+
+        // Set some common options
+        const options = {
+            nodes: {
+                shape: "box"
+            },
+            layout: {
+                hierarchical: {
+                    direction: "UD",
+                    sortMethod: "directed",
+                    levelSeparation: 300
+                }
+            },
+            physics: {
+                hierarchicalRepulsion: {
+                    nodeDistance: 140,
+                    avoidOverlap:1
+                }
+            }
+        };
+
+        network = new vis.Network(document.getElementById('graph'), parsedData, options);
+        network.on('afterDrawing', () => {
+            $('#loading').hide();
+        })
+
+        // On double click visit the pressed node url
+        network.on("doubleClick", params => {
+            document.location.href = params.nodes[0];
+        });
+    }
+</script>
+</body>
+</html>
