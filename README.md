@@ -6,8 +6,8 @@ Dynamic-dirb written in go.
 
 ## How it works
 
-Basically it use the [BFS](https://commons.wikimedia.org/wiki/File:Animated_BFS.gif) (Breadth First Search Algorithm) in order to discover new nodes.
-Each new node is parsed in order to discover new links. New regex can be easily add in order to improve the capability to find new nodes.
+Basically it uses *Breadth First Search* algorithm ([BFS](https://commons.wikimedia.org/wiki/File:Animated_BFS.gif)) to discover new nodes. When a new node is discovered, it is parsed to discover new links and subpaths.
+Additional regex can be easily implemented in order to improve the program capability to find new nodes.
 
 ### Example
 
