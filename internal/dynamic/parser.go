@@ -165,8 +165,8 @@ func getExistsUrl(toValidate []string, result map[string]bool) []string {
 			for _, url := range chunk {
 
 				// Wait n millisecond based on user option
-				time.Sleep(service.GetParameters().GetDelay() * time.Millisecond)
-
+				//time.Sleep(service.GetParameters().GetDelay() * time.Millisecond)
+				time.Sleep(service.GetParameters().GetDelay())
 				if result[url] {
 					continue
 				}

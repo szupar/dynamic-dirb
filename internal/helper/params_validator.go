@@ -14,6 +14,7 @@ type ParamValidator struct {
 	url               string
 	urlTarget         string
 	outputFile        string
+	overrideFile	  bool
 	outputFileGraph   string
 	outputFileRestore string
 	threads           int
@@ -33,8 +34,9 @@ type ParamValidator struct {
 // Init method to initialize the struct
 func (pv *ParamValidator) Init(url *string,
 	outputFile *string,
+	overrideFile *bool,
 	threads *int,
-	delay *int,
+	delay *string,
 	methods *string,
 	recursive *bool,
 	debugFlag *bool,
@@ -53,8 +55,9 @@ func (pv *ParamValidator) Init(url *string,
 	}
 	pv.urlTarget = getInitialUrl(*url)
 	pv.outputFile = *outputFile
+	pv.overrideFile = *overrideFile
 	pv.threads = *threads
-	pv.delay = time.Duration(*delay)
+	pv.delay,_ = time.ParseDuration(fmt.Sprintf("%s%s",*delay,"ms")) //time.Duration(*delay)
 	pv.methods = *methods
 	pv.recursive = *recursive
 	pv.domain = getDomainName(*url)
@@ -73,43 +76,45 @@ func (pv *ParamValidator) Init(url *string,
 }
 
 func PrintUsage() {
-	string_mng.PrintNormal("-type:\t\t\tSet -type dynamic/static/resumeDynamic\n")
+	string_mng.PrintNotice("\n** Program Usage **\n")
+	string_mng.PrintNotice("-type:\t\t\tSet -type dynamic/static/resumeDynamic\n")
 	//fmt.Fprintf(os.Stderr, "-type:\t\t\tSet -type dynamic/static/resumeDynamic\n\n")
-	PrintDynamicUsage()
 	PrintStaticUsage()
+	PrintDynamicUsage()
 	PrintResumeDynamicUsage()
 }
 
 func PrintDynamicUsage() {
-	string_mng.PrintNormal("dynamic Usage:")
+	string_mng.PrintInfo(" -dynamic:")
 	string_mng.PrintNormal("\t-url:\t\tTarget url in http/https format (http://example.com)")
 	string_mng.PrintNormal("\t-output:\tOutput file (default /tmp/ddirb-output)")
 	//string_mng.PrintNormal("\t-port:\tHttp listener port default: 8080")
 	string_mng.PrintNormal("\t-threads:\tNumber of threads to use")
-	string_mng.PrintNormal("\t-delay:\t\tDelay in seconds between each thread")
+	string_mng.PrintNormal("\t-delay:\t\tDelay in milliseconds between each thread")
 	string_mng.PrintNormal("\t-debug:\t\tFlag to print in verbose mode")
 	string_mng.PrintNormal("\t-graph:\t\tFlag to save the graph in .dot language")
 	string_mng.PrintNormal("\t-headers:\tSet headers (es. Header1:value1;value2,Header2:value1)")
 }
 
 func PrintResumeDynamicUsage() {
-	string_mng.PrintNormal("resumeDynamic Usage:")
+	string_mng.PrintInfo(" -resumeDynamic:")
 	string_mng.PrintNormal("\t-restoreFile:\tInput file (default /tmp/ddirb-output.restore)")
 	//string_mng.PrintNormal("\t-port:\tHttp listener port default: 8080")
 	string_mng.PrintNormal("\t-output:\tOutput file (default /tmp/ddirb-output)")
 	string_mng.PrintNormal("\t-threads:\tNumber of threads to use")
-	string_mng.PrintNormal("\t-delay:\t\tDelay in seconds between each thread")
+	string_mng.PrintNormal("\t-delay:\t\tDelay in milliseconds between each thread")
 	string_mng.PrintNormal("\t-debug:\t\tFlag to print in verbose mode")
 	string_mng.PrintNormal("\t-graph:\t\tFlag to save the graph in .dot language")
 	string_mng.PrintNormal("\t-headers:\tSet headers (es. Header1:value1;value2,Header2:value1)")
 }
 
 func PrintStaticUsage() {
-	string_mng.PrintNormal("[NOT IMPLEMENTED YET] static Usage:")
+	string_mng.PrintWarning(" -static: [NOT IMPLEMENTED YET] ")
 	string_mng.PrintNormal("\t-url:\t\tTarget url in http/https format (http://example.com)")
+	string_mng.PrintNormal("\t-wordlist:\tWordlist file [URL TODO]")
 	string_mng.PrintNormal("\t-output:\tOutput file (default /tmp/ddirb-output)")
 	string_mng.PrintNormal("\t-threads:\tNumber of threads to use")
-	string_mng.PrintNormal("\t-delay:\t\tDelay in seconds between each thread")
+	string_mng.PrintNormal("\t-delay:\t\tDelay in milliseconds between each thread")
 	string_mng.PrintNormal("\t-debug:\t\tFlag to print in verbose mode")
 	string_mng.PrintNormal("\t-headers:\tSet headers (es. Header1:value1;value2,Header2:value1)")
 }
@@ -138,6 +143,9 @@ func (pv *ParamValidator) GetDomain() string {
 }
 func (pv *ParamValidator) GetOutputFile() string {
 	return pv.outputFile
+}
+func (pv *ParamValidator) GetOverrideFile() bool {
+	return pv.overrideFile
 }
 func (pv *ParamValidator) GetOutputFileGraph() string {
 	return pv.outputFileGraph
@@ -202,7 +210,7 @@ func (pv *ParamValidator) PrettyPrintParameters() {
 	}
 	string_mng.PrintInfo("[*] Output restore: " + pv.outputFileRestore)
 	string_mng.PrintInfo("[*] Threads: " + strconv.Itoa(pv.threads))
-	string_mng.PrintInfo("[*] Requests delay: " + strconv.Itoa(int(pv.delay)))
+	string_mng.PrintInfo("[*] Requests delay: " + pv.delay.String())
 	string_mng.PrintInfo("[*] Methods: " + pv.methods)
 	string_mng.PrintInfo("[*] Recursive flag: " + strconv.FormatBool(pv.recursive))
 	string_mng.PrintInfo("[*] Restore file: " + pv.restoreFile)
@@ -222,89 +230,215 @@ func (pv *ParamValidator) PrettyPrintParameters() {
 // PrettyPrintParameters
 
 // ValidateUrl method verifies if url is valid i.e. non empty
-func (pv *ParamValidator) ValidateUrl() bool {
+func (pv *ParamValidator) ValidateUrl() (bool,string) {
 	if pv.url == "" {
 		// empty string verification
-		string_mng.PrintWarning("[?] URL is empty (example: http://www.google.com)")
-		return false
+		//string_mng.PrintWarning("[?] URL is empty (example: http://www.google.com)")
+		return false,"[-]\tURL " + pv.url + "is empty (example: http(s)://www.google.com)"
 	} else if !(strings.HasPrefix(pv.url, "http://") ||
 		strings.HasPrefix(pv.url, "https://")) {
 		// invalid schema verification
-		string_mng.PrintWarning("[?] Invalid URL format (example: http://www.google.com)")
-		return false
+		//string_mng.PrintWarning("[?] Invalid URL format (example: http://www.google.com)")
+		return false,"[-]\tInvalid URL" + pv.url + "! Correct format (example: http(s)://www.google.com)"
 	} else {
 		// everything ok
-		return true
+		return true,"OK\t" + pv.url + " is valid"
 	}
 }
 
 // ValidateOutputFile verifies if path is valid, already exists
-func (pv *ParamValidator) ValidateOutputFile() bool {
+func (pv *ParamValidator) ValidateOutputFile() (bool,string) {
+	// verify if output file exists
 	if file_mng.FileExists(pv.outputFile) {
-		if file_mng.RequireConfirmation("Output file already exists, do you want to override it? y/n") {
-			file_mng.EmptyFileOverride(pv.outputFile)
-			// if user need .dot graph override also .dot output file
-			if pv.IsGraph() {
-				file_mng.EmptyFileOverride(pv.outputFile + ".dot")
+		// verify if override is applied
+		if (pv.overrideFile){
+			return true,"OK\tOverriding with -override file "+pv.outputFile
+		} else{
+			// output exists, no override, asking for confirmation
+			if file_mng.RequireConfirmation("Output file "+pv.outputFile+" already exists, do you want to override it? y/n") {
+				file_mng.EmptyFileOverride(pv.outputFile)
+				// if user need .dot graph override also .dot output file
+				if pv.IsGraph() {
+					file_mng.EmptyFileOverride(pv.outputFile + ".dot")
+				}
+				return true,"OK\nOverriding  "+pv.outputFile+" with [y] answer"
+			} else{
+				return false,"[-]\tChoose a differente output file"
 			}
-
-			return true
 		}
-		return false
+	} else{
+		file_mng.EmptyFileOverride(pv.outputFile)
+		if pv.IsGraph() {
+			file_mng.EmptyFileOverride(pv.outputFile + ".dot")
+		}
+		return true,"OK\n file  "+pv.outputFile+" does not exists"
 	}
-
-	file_mng.EmptyFileOverride(pv.outputFile)
-	if pv.IsGraph() {
-		file_mng.EmptyFileOverride(pv.outputFile + ".dot")
-	}
-	return true
 }
 
 // ValidateThreads verifies the bounds range for threads field
-func (pv *ParamValidator) ValidateThreads() bool {
+func (pv *ParamValidator) ValidateThreads() (bool,string) {
 	if pv.threads < 1 || pv.threads > 10 {
-		// threads bounds verification (0-10 hardcoded limit)
-		return false
+		// Threads bounds verification failure (1-10 hardcoded limit)
+		return false,"[-]\tThreads must be in range 1-10"
 	}
-	return true
+	return true,"OK\tThreads value "+strconv.Itoa(pv.threads) +" is valid"
 }
 
-func (pv *ParamValidator) validateWordlist() bool {
-
-	if !file_mng.FileExists(pv.outputFile) {
-		string_mng.PrintError("[-] Wordlist not found")
-		return false
+func (pv *ParamValidator) ValidateWordlist() (bool,string) {
+	// call file exists
+	if !file_mng.FileExists(pv.wordlist) {
+		return false,"[-]\t Wordlist file not found"
 	}
-	return true
+	// file can be opened
+	if !file_mng.FileReadable(pv.wordlist){
+		return false,"[-]\t Wordlist file not readable"
+	}
+	// enough ram to open file (file size, ram check)
+
+	return true,"OK\t" + pv.wordlist + " is valid"
 }
 
 // ValidateDelay  must be implemented
-func (pv *ParamValidator) ValidateDelay() bool {
-	return true
-}
+func (pv *ParamValidator) ValidateDelay() (bool,string) {
+	// by default value of duration is set to 0 if < 0
+	/* delay should be in milliseconds :
+	default 0
+	if set
+		> 0
 
+	*/
+	//time.Sleep(pv.delay)
+	//fmt.Print(int64(pv.delay))
+	//tmp :=pv.delay * time.Second
+	//fmt.Print(int64(tmp))
+	return true,"OK\tValidated by go-lang internals"
+}
+func (pv *ParamValidator) ValidateHeaders() (bool,string){
+	return true,"OK\tHeader validation not implemented yet"
+}
 // ValidateMethods validates methods: at the momend GET/HEAD
 func (pv *ParamValidator) ValidateMethods() bool {
 	return false
 }
 
 func (pv *ParamValidator) ValidateDynamic() bool {
-	return (pv.ValidateUrl() &&
-		pv.ValidateOutputFile() &&
-		pv.ValidateThreads() &&
-		pv.ValidateDelay())
+	result,err := pv.ValidateUrl()
+	if(!result){
+		string_mng.PrintError("[!] Invalid option detected:")
+		string_mng.PrintError(err)
+		return result
+	}
+	result,err = pv.ValidateOutputFile()
+	if(!result){
+		string_mng.PrintError("[!] Invalid option detected:")
+		string_mng.PrintError(err)
+		return result
+	}
+	result,err = pv.ValidateThreads()
+	if(!result){
+		string_mng.PrintError("[!] Invalid option detected:")
+		string_mng.PrintError(err)
+		return result
+	}
+	result,err = pv.ValidateDelay()
+	if(!result){
+		string_mng.PrintError("[!] Invalid option detected:")
+		string_mng.PrintError(err)
+		return result
+	}
+	return true
 }
 
 func (pv *ParamValidator) ValidateRestoreDynamic() bool {
-	return (file_mng.FileExists(pv.restoreFile) && pv.ValidateDelay() && pv.ValidateThreads() && pv.ValidateOutputFile())
+	// pv.ValidateDelay() && pv.ValidateThreads() && pv.ValidateOutputFile())
+	result,err := pv.ValidateDelay()
+	if(!result){
+		string_mng.PrintError("[!] Invalid option detected:")
+		string_mng.PrintError(err)
+		return result
+	}
+	result,err = pv.ValidateThreads()
+	if(!result){
+		string_mng.PrintError("[!] Invalid option detected:")
+		string_mng.PrintError(err)
+		return result
+	}
+	result,err = pv.ValidateOutputFile()
+	if(!result){
+		string_mng.PrintError("[!] Invalid option detected:")
+		string_mng.PrintError(err)
+		return result
+	}
+	return file_mng.FileExists(pv.restoreFile)
 }
 
 func (pv *ParamValidator) ValidateStatic() bool {
-	return (pv.ValidateUrl() &&
-		pv.ValidateOutputFile() &&
-		pv.ValidateThreads() &&
-		pv.ValidateDelay() &&
-		pv.validateWordlist())
+	/*
+	-static: [NOT IMPLEMENTED YET]
+         -url:           Target url in http/https format (http://example.com)
+         -wordlist:      Wordlist file [URL TODO]
+         -output:        Output file (default /tmp/ddirb-output)
+         -threads:       Number of threads to use
+         -delay:         Delay in milliseconds between each thread
+         -debug:         Flag to print in verbose mode
+         -headers:       Set headers (es. Header1:value1;value2,Header2:value1)
+
+	*/
+	// -url validation
+	pv.PrintDebug("-url validation")
+	result,err := pv.ValidateUrl()
+	pv.PrintDebug(err)
+	if(!result){
+		string_mng.PrintError("[!] Invalid option detected:")
+		string_mng.PrintError(err)
+		return result
+	}
+	// -wordlist validation
+	pv.PrintDebug("-wordlist validation")
+	result,err = pv.ValidateWordlist()
+	pv.PrintDebug(err)
+	if(!result){
+		string_mng.PrintError("[!] Invalid option detected:")
+		string_mng.PrintError(err)
+		return result
+	}
+	// -output validation
+	pv.PrintDebug("-output validation")
+	result,err = pv.ValidateOutputFile()
+	pv.PrintDebug(err)
+	if(!result){
+		string_mng.PrintError("[!] Invalid option detected:")
+		string_mng.PrintError(err)
+		return result
+	}
+	// -threads validation
+	pv.PrintDebug("-threads validation")
+	result,err = pv.ValidateThreads()
+	pv.PrintDebug(err)
+	if(!result){
+		string_mng.PrintError("[!] Invalid option detected:")
+		string_mng.PrintError(err)
+		return result
+	}
+	// -delay validation
+	pv.PrintDebug("-delay validation")
+	result,err = pv.ValidateDelay()
+	pv.PrintDebug(err)
+	if(!result){
+		string_mng.PrintError("[!] Invalid option detected:")
+		string_mng.PrintError(err)
+		return result
+	}
+	// -headers validation
+	pv.PrintDebug("-headers validation")
+	result,err = pv.ValidateHeaders()
+	pv.PrintDebug(err)
+	if(!result){
+		string_mng.PrintError("[!] Invalid option detected:")
+		string_mng.PrintError(err)
+		return result
+	}
+	return true
 }
 
 func getInitialUrl(completeUrl string) string {

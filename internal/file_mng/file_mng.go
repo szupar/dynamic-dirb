@@ -13,6 +13,13 @@ func FileExists(fileName string) bool {
 	return err == nil
 }
 
+// function FileReadable verifies if a file is readable
+func FileReadable(fileName string) bool {
+	file, err := os.Open(fileName) // For read access.
+	defer file.Close()
+	return err == nil	
+}
+
 // function readLines return the content of a file
 func readLines(fileName string) ([]string, error) {
 	file, err := os.Open(fileName)

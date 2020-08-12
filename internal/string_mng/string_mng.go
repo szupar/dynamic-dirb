@@ -7,7 +7,7 @@ import (
 
 const (
 	InfoColor    = "\033[1;34m%s\033[0m\n" // light blue
-	NoticeColor  = "\033[1;36m%s\033[0m\n" //
+	NoticeColor  = "\033[1;36m%s\033[0m\n" // green
 	WarningColor = "\033[1;33m%s\033[0m\n" // yellow
 	DebugColor   = "\033[0;36m[-debug-] %s\033[0m\n" // blue
 	ErrorColor   = "\033[1;31m%s\033[0m\n" // red
@@ -45,6 +45,9 @@ func PrintInfo(message string) {
 	fmt.Printf(InfoColor, message)
 }
 
+func PrintBoolean(message bool){
+	PrintNormal(fmt.Sprintf("%t : %v",message,message))
+}
 func UpdateLine(message string) {
 	fmt.Printf("\r%s", message)
 }

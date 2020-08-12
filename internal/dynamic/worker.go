@@ -32,6 +32,12 @@ func worker() {
 	url := service.GetParameters().GetUrl()
 
 	response, code := http_mng.RequestResourceExist(url)
+	string_mng.PrintInfo("Code:")
+	fmt.Print(code)
+	string_mng.PrintBoolean(code)
+	string_mng.PrintInfo("Response:")
+	fmt.Println("test")
+	//string_mng.PrintNotice(response)
 	service.GetParameters().PrintDebug("Testing if target reachable...")
 	if !code {
 		string_mng.PrintError("Get request response with code: " + strconv.Itoa(response.ResponseCode) + "\n")
