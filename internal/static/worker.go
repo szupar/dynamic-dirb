@@ -2,8 +2,8 @@ package static
 
 import (
 	"dynamic-dirb/internal/string_mng"
+	"dynamic-dirb/internal/file_mng"
 	service "dynamic-dirb/internal/services"
-_	"os"
 )
 
 func Static() {
@@ -31,6 +31,15 @@ func Static() {
 	service.GetParameters().PrintDebug("Validating static parameters...")
 	if (service.GetParameters().ValidateStatic()) {
 		service.GetParameters().PrettyPrintParameters()
+		// print Wordlist content
+		wordlistContent := file_mng.ReadFileByLine(service.GetParameters().GetWordlist())
+		wordlistLen := len(wordlistContent)
+
+		for i:=0; i< wordlistLen; i=i+1{
+			service.GetParameters().PrintDebug(wordlistContent[i])
+		}
+		// check if target reachable with HEAD
+
 	}else{
 		string_mng.PrintWarning("[NOT IMPLEMENTED YET]")
 	}
