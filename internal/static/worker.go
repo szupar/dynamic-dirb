@@ -4,6 +4,9 @@ import (
 	"dynamic-dirb/internal/string_mng"
 	"dynamic-dirb/internal/file_mng"
 	service "dynamic-dirb/internal/services"
+	_ "fmt"
+	_ "net/http"
+	_ "io/ioutil"
 )
 
 func Static() {
@@ -32,13 +35,19 @@ func Static() {
 	if (service.GetParameters().ValidateStatic()) {
 		service.GetParameters().PrettyPrintParameters()
 		// print Wordlist content
-		wordlistContent := file_mng.ReadFileByLine(service.GetParameters().GetWordlist())
-		wordlistLen := len(wordlistContent)
-
-		for i:=0; i< wordlistLen; i=i+1{
-			service.GetParameters().PrintDebug(wordlistContent[i])
+		//wordlistContent := file_mng.ReadFileByLine(service.GetParameters().GetWordlist())
+		_ = file_mng.ReadFileByLine(service.GetParameters().GetWordlist())
+		/*
+		// single http request
+		response, error = http.Head(service.GetParameters().GetUrl())
+		if err != nil {
+			// handle error
 		}
-		// check if target reachable with HEAD
+		defer resp.Body().Close()
+		body, err := ioutil.ReadAll(resp.Body)
+		fmt.Println(body)
+		*/
+		string_mng.PrintWarning("[NOT IMPLEMENTED YET]")
 
 	}else{
 		string_mng.PrintWarning("[NOT IMPLEMENTED YET]")
