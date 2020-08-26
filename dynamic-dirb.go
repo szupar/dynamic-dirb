@@ -13,8 +13,8 @@ _	"os"
 )
 
 // set $GOPATH to ddirb then go build src/main/main.go then ./main
-// Compiling for raspberrys env GOOS=linux GOARCH=arm go build -o ddirb_linux ./ddirb.go
-// Compilinf for kali env GOOS=linux GOARCH=amd64 go build -o ddirb_linux ./ddirb.go
+// Compiling for raspberrys env GOOS=linux GOARCH=arm go build -o dynamic-dirb_linux ./dynamic-dirb.go
+// Compilinf for kali env GOOS=linux GOARCH=amd64 go build -o dynamic-dirb_linux ./dynamic-dirb.go
 
 func main() {
 
