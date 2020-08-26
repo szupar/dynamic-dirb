@@ -1,7 +1,8 @@
 .DS_Store
-ddirb
-ddirb_linux
+dynamic-dirb
+dynamic-dirb_linux
 **/node_modules
 tests
 test.go
 dynamic-dirb
+.idea

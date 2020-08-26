@@ -54,6 +54,7 @@ func (pv *ParamValidator) Init(url *string,
 		}
 	}
 	pv.urlTarget = getInitialUrl(*url)
+	fmt.Print(pv.urlTarget)
 	pv.outputFile = *outputFile
 	pv.overrideFile = *overrideFile
 	pv.threads = *threads
@@ -94,6 +95,7 @@ func PrintDynamicUsage() {
 	string_mng.PrintNormal("\t-debug:\t\tFlag to print in verbose mode")
 	string_mng.PrintNormal("\t-graph:\t\tFlag to save the graph in .dot language")
 	string_mng.PrintNormal("\t-headers:\tSet headers (es. Header1:value1;value2,Header2:value1)")
+	string_mng.PrintNormal("\t-override:\tOverride output files without asking")
 }
 
 func PrintResumeDynamicUsage() {
@@ -106,6 +108,7 @@ func PrintResumeDynamicUsage() {
 	string_mng.PrintNormal("\t-debug:\t\tFlag to print in verbose mode")
 	string_mng.PrintNormal("\t-graph:\t\tFlag to save the graph in .dot language")
 	string_mng.PrintNormal("\t-headers:\tSet headers (es. Header1:value1;value2,Header2:value1)")
+	string_mng.PrintNormal("\t-override:\tOverride output files without asking")
 }
 
 func PrintStaticUsage() {
@@ -117,6 +120,7 @@ func PrintStaticUsage() {
 	string_mng.PrintNormal("\t-delay:\t\tDelay in milliseconds between each thread")
 	string_mng.PrintNormal("\t-debug:\t\tFlag to print in verbose mode")
 	string_mng.PrintNormal("\t-headers:\tSet headers (es. Header1:value1;value2,Header2:value1)")
+	string_mng.PrintNormal("\t-override:\tOverride output files without asking")
 }
 
 // From url set url and domain
@@ -443,7 +447,7 @@ func (pv *ParamValidator) ValidateStatic() bool {
 
 func getInitialUrl(completeUrl string) string {
 	//https://admin:admin@www.test.com
-	var regex = regexp.MustCompile(`^(https?:\/\/)?([^@\n]+@)?(www\.)?([^:\/\n?]+)`)
+	var regex = regexp.MustCompile(`^(https?:\/\/)?([^@\n]+@)?(www\.)?([^\/\n?]+)`)
 	var result = regex.FindAllStringSubmatch(completeUrl, -1)
 	//[[https://example.com example.com]]
 	if len(result) == 0 {

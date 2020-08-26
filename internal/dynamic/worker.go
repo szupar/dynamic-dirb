@@ -32,11 +32,6 @@ func worker() {
 	url := service.GetParameters().GetUrl()
 
 	response, code := http_mng.RequestResourceExist(url)
-	string_mng.PrintInfo("Code:")
-	fmt.Print(code)
-	string_mng.PrintBoolean(code)
-	string_mng.PrintInfo("Response:")
-	fmt.Println("test")
 	//string_mng.PrintNotice(response)
 	service.GetParameters().PrintDebug("Testing if target reachable...")
 	if !code {
@@ -53,6 +48,7 @@ func worker() {
 	string_mng.PrintNotice("Finish\n")
 	fmt.Println(result)*/
 
+	service.GetParameters().PrintDebug("...Target reachable!")
 	var startUrl []string
 	startUrl = append(startUrl, service.GetParameters().GetUrl())
 	startResult := map[string]bool{service.GetParameters().GetUrl(): true}
