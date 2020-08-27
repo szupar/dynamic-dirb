@@ -31,9 +31,8 @@ func worker() {
 	service.GetParameters().PrintDebug("Worker instantiated...")
 	url := service.GetParameters().GetUrl()
 
-	response, code := http_mng.RequestResourceExist(url)
-	//string_mng.PrintNotice(response)
 	service.GetParameters().PrintDebug("Testing if target reachable...")
+	response, code := http_mng.RequestResourceExist(url)
 	if !code {
 		string_mng.PrintError("Get request response with code: " + strconv.Itoa(response.ResponseCode) + "\n")
 		for key, _ := range response.ResponseHeader {

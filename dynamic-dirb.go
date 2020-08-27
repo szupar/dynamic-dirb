@@ -8,7 +8,7 @@ import (
 	"dynamic-dirb/internal/string_mng"
 	"dynamic-dirb/internal/web_mng"
 	"flag"
-_	"os"
+	_ "os"
 	"sync"
 )
 
@@ -32,6 +32,7 @@ func main() {
 	scanType := flag.String("type", "", "Scan type dynamic/static/resumeDynamic")
 	wordlist := flag.String("wordlist", "", "Wordlist file [Static mode]")
 	headers := flag.String("headers", "", "Header (es. Header1:value1;value2,Header2:value1)")
+	exclusionPath := flag.String("exclusionPath", "", "Path to exclude es. logout")
 	//port := flag.Int("port", 8081, "Http listener port default: 8081")
 	port := 5689
 	flag.Usage = helper.PrintUsage //override flag.Usage
@@ -40,41 +41,41 @@ func main() {
 
 	GlobalParameters := new(helper.ParamValidator)
 	GlobalParameters.Init(url, outputFile, overrideFile, threadsCount, delay, methods, recursive, debugFlag, graph, scanType,
-		wordlist, headers, restoreFile, &port)
+		wordlist, headers, restoreFile, &port, exclusionPath)
 	service.SetParameters(GlobalParameters)
 
 	switch service.GetParameters().GetScanType() {
-		case "dynamic":
-			service.GetParameters().PrintDebug("-dynamic case")
-			// set up a ctrl+c handler
-			dynamic.SetupCloseHandler()
-			var wg sync.WaitGroup
-			wg.Add(1)
-			//spawn web server
-			go web_mng.StartWebServer()
-			// compute dynamic web scraping
-			dynamic.Dynamic()
-			wg.Wait()
-			break
-		case "static":
-			service.GetParameters().PrintDebug("-static case")
-			static.Static()
-			break
-		case "resumeDynamic":
-			service.GetParameters().PrintDebug("-resumeDynamic case")
-			// set up a ctrl+c handler
-			dynamic.SetupCloseHandler()
-			var wg sync.WaitGroup
-			wg.Add(1)
-			//spawn web server
-			go web_mng.StartWebServer()
-			dynamic.RestoreDynamicExecution()
-			wg.Wait()
-			break
-		default:
-			string_mng.PrintError("[!] Invalid option detected:")
-			string_mng.PrintError("[*]\tscan type")
-			helper.PrintUsage()
-			// os.Exit(0)
+	case "dynamic":
+		service.GetParameters().PrintDebug("-dynamic case")
+		// set up a ctrl+c handler
+		dynamic.SetupCloseHandler()
+		var wg sync.WaitGroup
+		wg.Add(1)
+		//spawn web server
+		go web_mng.StartWebServer()
+		// compute dynamic web scraping
+		dynamic.Dynamic()
+		wg.Wait()
+		break
+	case "static":
+		service.GetParameters().PrintDebug("-static case")
+		static.Static()
+		break
+	case "resumeDynamic":
+		service.GetParameters().PrintDebug("-resumeDynamic case")
+		// set up a ctrl+c handler
+		dynamic.SetupCloseHandler()
+		var wg sync.WaitGroup
+		wg.Add(1)
+		//spawn web server
+		go web_mng.StartWebServer()
+		dynamic.RestoreDynamicExecution()
+		wg.Wait()
+		break
+	default:
+		string_mng.PrintError("[!] Invalid option detected:")
+		string_mng.PrintError("[*]\tscan type")
+		helper.PrintUsage()
+		// os.Exit(0)
 	}
 }

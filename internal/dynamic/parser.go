@@ -5,6 +5,7 @@ import (
 	service "dynamic-dirb/internal/services"
 	"regexp"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
@@ -77,12 +78,15 @@ func matchDomainUrl(toValidate []string) []string {
 
 	for _, url := range toValidate {
 		if len(url) >= 2 {
-			//prendo gli url che iniziano con il nome del dominio di test e quelli che iniziano con / ./ [a-z]
-			if service.GetParameters().GetDomain() == http_mng.GetDomainName(url) || checkUrlSyntax(url) {
-				service.GetParameters().PrintDebug("[+] Matched domain or Url start with / or ./ or ../ or [a-z] for: " + url)
-				//return_matched = append(return_matched, url)
-				if !uniqueList[url] {
-					uniqueList[url] = true
+			// scan only if url doesn't contain blacklist path
+			if !strings.Contains(url, service.GetParameters().GetExclusionPath()) || service.GetParameters().GetExclusionPath() == "" {
+				//prendo gli url che iniziano con il nome del dominio di test e quelli che iniziano con / ./ [a-z]
+				if service.GetParameters().GetDomain() == http_mng.GetDomainName(url) || checkUrlSyntax(url) {
+					service.GetParameters().PrintDebug("[+] Matched domain or Url start with / or ./ or ../ or [a-z] for: " + url)
+					//return_matched = append(return_matched, url)
+					if !uniqueList[url] {
+						uniqueList[url] = true
+					}
 				}
 			}
 		}
