@@ -5,4 +5,5 @@ dynamic-dirb_linux
 tests
 test.go
 dynamic-dirb
+todo.txt
 .idea
