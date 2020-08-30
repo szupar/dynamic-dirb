@@ -30,6 +30,7 @@ type ParamValidator struct {
 	restoreFile       string
 	port              int
 	exclusionPath     string
+	resourceExistMapCode map[int]bool
 }
 
 // Init method to initialize the struct
@@ -75,6 +76,15 @@ func (pv *ParamValidator) Init(url *string,
 	pv.restoreFile = *restoreFile
 	pv.port = *port
 	pv.exclusionPath = *exclusionPath
+	validResourceExistCode := make(map[int]bool)
+	validResourceExistCode[200] = true
+	validResourceExistCode[204] = true
+	validResourceExistCode[301] = true
+	validResourceExistCode[302] = true
+	validResourceExistCode[307] = true
+	validResourceExistCode[401] = true
+	validResourceExistCode[403] = true
+	pv.resourceExistMapCode = validResourceExistCode
 
 }
 
@@ -203,6 +213,10 @@ func (pv *ParamValidator) IsGraph() bool {
 // PrintStructure method prints the structure
 func (pv *ParamValidator) PrintStructure() {
 	fmt.Printf("%+v\n", pv)
+}
+
+func (pv *ParamValidator) GetResourceExistMapCode() map[int]bool {
+	return pv.resourceExistMapCode
 }
 
 func (pv *ParamValidator) PrintDebug(message string) {

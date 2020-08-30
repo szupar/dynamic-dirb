@@ -77,13 +77,11 @@ func RequestGet(url string) ResponseInfo {
 //return (ResponseInfo,bool): true if response code = 200 else false (both case return also response)
 func RequestResourceExist(url string) (ResponseInfo, bool) {
 	response := RequestGet(url)
-
 	if response.ResponseBodyString != "" {
-		if response.ResponseCode == 200 || response.ResponseCode == 403 {
+		if service.IsResourceExist(service.GetParameters().GetResourceExistMapCode(), response.ResponseCode) {
 			return response, true
 		}
 	}
-
 	return response, false
 }
 
