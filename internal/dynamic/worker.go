@@ -32,8 +32,8 @@ func worker() {
 	url := service.GetParameters().GetUrl()
 
 	service.GetParameters().PrintDebug("Testing if target reachable...")
-	response, code := http_mng.RequestResourceExist(url)
-	if !code {
+	response, exist := http_mng.RequestResourceExist(url)
+	if !exist {
 		string_mng.PrintError("Get request response with code: " + strconv.Itoa(response.ResponseCode) + "\n")
 		for key, _ := range response.ResponseHeader {
 			string_mng.PrintWarning(key + " " + response.ResponseHeader[key][0])
@@ -116,7 +116,7 @@ func BFS(queue []string, result map[string]bool) map[string]bool {
 		discoveredUrl := GetFinalUrls(response, result)
 
 		string_mng.ClearProgress()
-		string_mng.PrintDynamicScanStatus(len(queue), url, len(discoveredUrl))
+		string_mng.PrintDynamicScanStatus(len(queue), url, len(discoveredUrl), service.GetOutputLenght())
 
 		for _, newUrl := range discoveredUrl {
 			// if node is node visited yet

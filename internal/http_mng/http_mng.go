@@ -37,7 +37,7 @@ func RequestGet(url string) ResponseInfo {
 
 	if err != nil {
 		service.GetParameters().PrintDebug(err.Error())
-		string_mng.PrintError("[-] Error on url: " + url)
+		string_mng.PrintError("[-] Error on url: " + url + ". Error details: " + err.Error())
 		var response ResponseInfo
 		response.ResponseCode = 0
 		response.Domain = ""
@@ -51,7 +51,7 @@ func RequestGet(url string) ResponseInfo {
 	// if error occurred set all struct variable to empty
 	if err != nil {
 		service.GetParameters().PrintDebug(err.Error())
-		string_mng.PrintError("[-] Error on url: " + url)
+		string_mng.PrintError("[-] Error on url: " + url + ". Error details: " + err.Error())
 		var response ResponseInfo
 		response.ResponseCode = 0
 		response.Domain = ""

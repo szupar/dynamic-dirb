@@ -13,3 +13,7 @@ func SetNewNodeOutput(newOutput string) {
 func GetOutput() []string {
 	return output
 }
+
+func GetOutputLenght() int {
+	return len(GetOutput())
+}
