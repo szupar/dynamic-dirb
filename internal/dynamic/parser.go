@@ -142,7 +142,7 @@ func matchDomainUrl(toValidate []string) []string {
 // tovalidate([]string): urls array to check
 // result (map[string]bool): urls already discovered in previous interaction
 // return([]string): url array containing url with response code = 200
-func getExistsUrl(toValidate []string, result map[string]bool) []string {
+func getExistsUrl(toValidate []string, result map[string]bool, notExisting map[string]bool) []string {
 	var return_matched []string
 	var thread = service.GetParameters().GetThreads()
 	var divided [][]string
@@ -171,9 +171,6 @@ func getExistsUrl(toValidate []string, result map[string]bool) []string {
 				// Wait n millisecond based on user option
 				//time.Sleep(service.GetParameters().GetDelay() * time.Millisecond)
 				time.Sleep(service.GetParameters().GetDelay())
-				if result[url] {
-					continue
-				}
 				//Composing url string
 				//if url start with https/http no problem
 				var completeUrl = ""
@@ -195,15 +192,23 @@ func getExistsUrl(toValidate []string, result map[string]bool) []string {
 					}
 				}
 
+				if result[completeUrl] {
+					continue
+				}
+
+				if notExisting[completeUrl]{
+					continue
+				}
+
 				service.GetParameters().PrintDebug("Check if " + completeUrl + " exist")
 				response, code := http_mng.RequestResourceExist(completeUrl)
-				// if code == true --> response code == 200
 				if code {
 					service.GetParameters().PrintDebug("[+] Exists: " + url)
 					m.Lock()
 					return_matched = append(return_matched, completeUrl)
 					m.Unlock()
 				} else {
+					notExisting[completeUrl]=true
 					service.GetParameters().PrintDebug("[-] Not exists: " + url + " Status code: " + strconv.Itoa(response.ResponseCode))
 				}
 
@@ -219,7 +224,7 @@ func getExistsUrl(toValidate []string, result map[string]bool) []string {
 //target (*helper.ParamValidator): target details
 //response (http_mng.ResponseInfo): response information
 //return ([]string): url array found in source code of response. With response 200 and in target scope
-func GetFinalUrls(response http_mng.ResponseInfo, result map[string]bool) []string {
+func GetFinalUrls(response http_mng.ResponseInfo, result map[string]bool, notExisting map[string]bool) []string {
 
 	// creating channel
 	jsChannel := make(chan []string, 1)
@@ -239,7 +244,7 @@ func GetFinalUrls(response http_mng.ResponseInfo, result map[string]bool) []stri
 	discoveredUrl = append(discoveredUrl, discoveredGenericUrl...)
 	discoveredUrl = matchDomainUrl(discoveredUrl)
 	service.GetParameters().PrintDebug("Getting existing url")
-	discoveredUrl = getExistsUrl(discoveredUrl, result)
+	discoveredUrl = getExistsUrl(discoveredUrl, result, notExisting)
 
 	return discoveredUrl
 

@@ -29,7 +29,7 @@ func RestoreDynamicExecution() {
 	// Restoring output file
 	_ = restoreOutputFile(queueString, startResult)
 
-	_ = BFS(queueString, startResult)
+	_ = BFS(queueString, startResult, make(map[string]bool))
 	service.GetParameters().PrintDebug("...BFS is done!")
 	string_mng.PrintNotice("\nFinish\n")
 	service.GetParameters().PrintDebug("...Worker is done!")
@@ -80,7 +80,7 @@ func restoreGraph() ([]string, map[string]bool) {
 // Restoring new ouput file using queue and result
 func restoreOutputFile(queueString []string, startResult map[string]bool) string {
 	outputFileMap := startResult
-	// Mergin queue and result in a unique map
+	// Merging queue and result in a unique map
 	for _, value := range queueString {
 		if !outputFileMap[value] {
 			outputFileMap[value] = true

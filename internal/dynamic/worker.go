@@ -53,13 +53,15 @@ func worker() {
 	startResult := map[string]bool{service.GetParameters().GetUrl(): true}
 	service.GetParameters().PrintDebug("Starting BFS...")
 	service.SetGraphName(service.GetParameters().GetUrl())
-	_ = BFS(startUrl, startResult)
+	_ = BFS(startUrl, startResult, make(map[string]bool))
 	service.GetParameters().PrintDebug("...BFS is done!")
 	string_mng.PrintNotice("\nFinish\n")
 	service.GetParameters().PrintDebug("...Worker is done!")
 
 }
 
+/*
+// DO NOT DELETE ONLY USED FOR TESTING PURPOSE
 // target(targetInfo): target information
 // result(map[string]bool): array containing the found urls for recursion
 // return(map[string]bool): array containing the found urls
@@ -90,13 +92,13 @@ func DFS(target *helper.ParamValidator, url string, result map[string]bool) map[
 		DFS(target, newUrl, result)
 	}
 	return result
-}
+}*/
 
 // target(helper.ParamValidator): target information
 // queue([]string): array containing the queue
 // result(map[string]bool): array containing the found urls
 // return(map[string]bool): array containing the found urls
-func BFS(queue []string, result map[string]bool) map[string]bool {
+func BFS(queue []string, result map[string]bool, notExisting map[string]bool) map[string]bool {
 	service.SetIsFinish(false)
 
 	for (len(queue)) != 0 {
@@ -113,8 +115,8 @@ func BFS(queue []string, result map[string]bool) map[string]bool {
 		}
 
 		// discovering js script and href url and validating it
-		discoveredUrl := GetFinalUrls(response, result)
-
+		discoveredUrl := GetFinalUrls(response, result, notExisting)
+		fmt.Println(notExisting)
 		string_mng.ClearProgress()
 		string_mng.PrintDynamicScanStatus(len(queue), url, len(discoveredUrl), service.GetOutputLenght())
 
