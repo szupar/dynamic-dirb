@@ -7,7 +7,8 @@ Dynamic-dirb written in go.
 ## How it works
 
 Basically it uses *Breadth First Search* algorithm ([BFS](https://commons.wikimedia.org/wiki/File:Animated_BFS.gif)) to discover new nodes. When a new node is discovered, it is parsed to discover new links and subpaths.
-Additional regex can be easily implemented in order to improve the program capability to find new nodes.
+
+[Additional regex can be easily implemented in order to improve the program capability to find new nodes](#adding-new-custom-rules).
 
 ### Example
 
@@ -54,7 +55,7 @@ resumeDynamic Usage:
 	-headers:	Set headers (es. Header1:value1;value2,Header2:value1)
 ```
 
-## Example
+# Example
 
 #### "dynamic" usage
 
@@ -74,3 +75,39 @@ Generated output:
 1. If scan has finished &rarr; ```cat ~/Desktop/ddirbOutRestored; cat ~/ddirbOutRestored.dot```
 
 2. If scan has not finished &rarr; ```cat ~/Desktop/ddirbOutRestored; cat ~/Desktop/ddirbOutRestored.dot; cat ~/Desktop/ddirbOutRestored.restore```
+
+
+## Adding new custom rules
+
+In order to add new custom rules you shuold edit ```/internal/dynamic/parser.go```  file.
+
+#### Example
+
+Adding new function
+
+```
+func getMyCustomUrl(MyChannel chan<- []string, response http_mng.ResponseInfo) {
+	var body = response.ResponseBodyString
+	var return_matched []string
+	var regex = regexp.MustCompile(`PUT REGEX HERE`)
+	var result = regex.FindAllStringSubmatch(body, -1)
+	for _, s := range result {
+		for j := 1; j < len(s); j++ {
+			return_matched = append(return_matched, s[j])
+			service.GetParameters().PrintDebug("[+] Regex getting my custom url: " + s[j])
+		}
+	}
+	MyChannel <- return_matched
+}
+```
+
+Adding new thread call (in GetFinalUrls function)
+
+```
+MyCustomChannel := make(chan []string, 1)
+go getMyCustomUrl(MyCustomChannel, response)
+discoveredCustomUrl := <-MyCustomChannel
+discoveredUrl = append(discoveredUrl, discoveredCustomUrl...)
+```
+
+
